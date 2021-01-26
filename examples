@@ -1,0 +1,4 @@
+POST
+    curl -H "Content-Type: application/json" -X POST -d '{"url":"https://www.youtube.com/watch?v=WEdfbGO2yNk"}' http://localhost:6969/api/videos
+GET
+    curl -X GET http://localhost:3001/api/videos/queue
