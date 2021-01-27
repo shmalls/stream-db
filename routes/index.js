@@ -4,6 +4,8 @@ const Article = require('../models/article');
 const Video = require('../models/video');
 const youtube = require('youtube-metadata-from-url');
 
+const CHUNK_SIZE = 25;
+
 // START article routes
 
 router.get('/articles', function(req, res) {
@@ -62,33 +64,25 @@ router.delete('/articles/:id', function(req, res) {
 // START video routes
 
 // GET all videos
-router.get('/videos', function(req, res) {
-  Video.find({}).sort({date:-1}).exec((err, docs) => {
-    res.json(docs);
-  })
+router.get('/videos/all', function(req, res) {
+  Video.find({}).sort({date:-1}).exec((err, videos) => {
+    res.json(videos);
+  });
 });
 
+// GET n latest videos
+router.get('/videos', function(req, res) {
+    Video.find({}).sort({date:-1}).limit(CHUNK_SIZE).exec((err, videos) => {
+      res.json(videos);
+    });
+  });
 
-// GET all unpopulated videos
-// router.get('/videos/queue/populate', function(req, res) {
-//   Video.find({ 'isPopulated' : false }, function(err, videos) {
-//     res.json(videos)
-//   });
-// });
-
-// GET all undownloaded populated & valid videos
-// router.get('/videos/queue/download', function(req, res) {
-//   Video.find({ 'isDownloaded' : false, 'isPopulated' : true, 'isValid' : true }, function(err, videos) {
-//     res.json(videos);
-//   });
-// });
-
-// GET all downloaded unwatched videos
-// router.get('/videos/queue/watch', function(req, res) {
-//   Video.find({ 'isDownloaded' : true, 'isWatched' : false }, function(err, videos) {
-//     res.json(videos);
-//   });
-// });
+// GET next n videos
+router.get('/videos/:id', function(req, res) {
+    Video.find({_id: {$lt: req.params.id}}).sort({_id: -1}).limit(CHUNK_SIZE).exec((err, videos) => {
+        res.json(videos);
+    })
+});
 
 // CREATE new video
 router.post('/videos', function(req, res) {
